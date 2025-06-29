@@ -9,4 +9,5 @@ require (
 	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/redis/go-redis v6.15.9+incompatible // indirect
 	github.com/redis/go-redis/v9 v9.10.0 // indirect
+	github.com/rs/cors v1.11.1 // indirect
 )
