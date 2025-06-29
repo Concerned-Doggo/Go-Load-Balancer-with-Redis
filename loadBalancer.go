@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 	"sync"
 )
@@ -41,6 +40,17 @@ func (lb *LoadBalancer) ServeProxy(rw http.ResponseWriter, r *http.Request) {
 		http.Error(rw, "No Server Available", http.StatusServiceUnavailable)
 		return
 	}
-	fmt.Printf("forwarding the request to %s\n", targetServer.Address())
 	targetServer.Serve(rw, r)
 }
+
+func (lb *LoadBalancer) ChartServerProxy(rw http.ResponseWriter, r *http.Request) {
+
+	targetServer := lb.GetNextAvailableServer()
+	if targetServer == nil {
+		http.Error(rw, "No Server Available", http.StatusServiceUnavailable)
+		return
+	}
+	targetServer.ServeChart(rw, r)
+}
+
+

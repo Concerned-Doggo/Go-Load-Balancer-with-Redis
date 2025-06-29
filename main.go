@@ -10,6 +10,7 @@ import (
 
 func main() {
 	err := godotenv.Load()
+
 	if err != nil {
 		panic("Error loading .env file")
 	}
@@ -24,15 +25,16 @@ func main() {
 
 	ConnectRedis()
 	lb := NewLoadBalancer("8080", servers)
-	handleHome := func(rw http.ResponseWriter, r *http.Request) {
-		lb.ServeProxy(rw, r)
-	}
+	
 	handleCoin := func(rw http.ResponseWriter, r *http.Request) {
 		lb.ServeProxy(rw, r)
 	}
+	handleChart := func (rw http.ResponseWriter, r *http.Request) {
+		lb.ChartServerProxy(rw, r)
+	}
 
-	http.HandleFunc("/", handleHome)
-	http.HandleFunc("/coin/{name}", handleCoin)
+	http.HandleFunc("/{name}", handleCoin)
+	http.HandleFunc("/{name}/market_chart", handleChart)
 
 	fmt.Printf("serving request at 'localhost:%s'", lb.Port)
 	http.ListenAndServe(":"+lb.Port, nil)

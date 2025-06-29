@@ -2,8 +2,13 @@ package main
 
 import (
 	"context"
+	"fmt"
+	"os"
+	"time"
 
 	"github.com/redis/go-redis/v9"
+
+	"github.com/joho/godotenv"
 )
 
 var (
@@ -12,18 +17,24 @@ var (
 )
 
 func ConnectRedis() {
+
+	err := godotenv.Load()
+	if err != nil{
+		fmt.Println("error loading env file for redis")
+	}
+
 	ctx = context.Background()
 
 	rdb = redis.NewClient(&redis.Options{
-		Addr:     "redis-18578.c90.us-east-1-3.ec2.redns.redis-cloud.com:18578",
+		Addr:     os.Getenv("REDIS_ADDRESS"),
 		Username: "default",
-		Password: "N2iePQAw4s0jSKhcwP2NIpV79F6IvFei",
+		Password: os.Getenv("REDIS_PASSWORD"),
 		DB:       0,
 	})
 }
 
 func SetRedisData(key string, data interface{}) {
-	rdb.Set(ctx, key, data, 0)
+	rdb.Set(ctx, key, data, 6 * time.Hour)
 }
 
 func GetRedisData(key string) string {
