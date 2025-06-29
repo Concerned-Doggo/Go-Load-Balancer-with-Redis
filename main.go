@@ -29,11 +29,11 @@ func main() {
 	
 
 	handleCoin := func(rw http.ResponseWriter, r *http.Request) {
-		enableCors(&rw)
+		enableCors(&rw, r)
 		lb.ServeProxy(rw, r)
 	}
 	handleChart := func (rw http.ResponseWriter, r *http.Request) {
-		enableCors(&rw)
+		enableCors(&rw, r)
 		lb.ChartServerProxy(rw, r)
 	}
 
@@ -44,9 +44,13 @@ func main() {
 	fmt.Printf("serving request at 'localhost:%s'", lb.Port)
 	http.ListenAndServe(":"+lb.Port, nil)
 }
-func enableCors(w *http.ResponseWriter) {
-    (*w).Header().Set("Access-Control-Allow-Origin", "https://crypto-insight1.netlify.app/")
+
+func enableCors(w *http.ResponseWriter, r *http.Request) {
+    origin := r.Header.Get("Origin")
+	if origin == "https://crypto-insight1.netlify.app" || origin == "http://localhost:5173" || origin == "http://localhost:4173" {
+        (*w).Header().Set("Access-Control-Allow-Origin", origin)
+    }
+    (*w).Header().Set("Access-Control-Allow-Headers", "Content-Type")
+    (*w).Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
 }
-
-
 
