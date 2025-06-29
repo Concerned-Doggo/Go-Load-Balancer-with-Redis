@@ -6,7 +6,6 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
-	"github.com/rs/cors"
 )
 
 func main() {
@@ -24,33 +23,30 @@ func main() {
 	}
 
 
-	mux := http.NewServeMux()
-
-    cors := cors.New(cors.Options{
-		AllowedOrigins: []string{ "https://crypto-insight1.netlify.app/", "http://localhost:5173", "http://localhost:4173"},
-        AllowedMethods: []string{
-            http.MethodGet,
-        },
-        AllowedHeaders:   []string{"Content-Type"},
-    })
 
 	ConnectRedis()
 	lb := NewLoadBalancer("8080", servers)
 	
 
 	handleCoin := func(rw http.ResponseWriter, r *http.Request) {
+		enableCors(&rw)
 		lb.ServeProxy(rw, r)
 	}
 	handleChart := func (rw http.ResponseWriter, r *http.Request) {
+		enableCors(&rw)
 		lb.ChartServerProxy(rw, r)
 	}
 
-	mux.HandleFunc("/{name}", handleCoin)
-    mux.HandleFunc("/{name}/market_chart", handleChart)
+	http.HandleFunc("/{name}", handleCoin)
+    http.HandleFunc("/{name}/market_chart", handleChart)
 
-	handler := cors.Handler(mux)
 
 	fmt.Printf("serving request at 'localhost:%s'", lb.Port)
-	http.ListenAndServe(":"+lb.Port, handler)
+	http.ListenAndServe(":"+lb.Port, nil)
 }
+func enableCors(w *http.ResponseWriter) {
+    (*w).Header().Set("Access-Control-Allow-Origin", "https://crypto-insight1.netlify.app/")
+}
+
+
 
